@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Register(r *gin.Engine, authHandler *handler.AuthHandler) {
+func Register(r *gin.Engine, authHandler *handler.AuthHandler, habitHandler *handler.HabitHandler, authMW gin.HandlerFunc) {
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"ok": true})
 	})
@@ -18,4 +18,8 @@ func Register(r *gin.Engine, authHandler *handler.AuthHandler) {
 
 	authGroup := api.Group("/auth")
 	authHandler.RegisterRoutes(authGroup)
+
+	habits := api.Group("/habits")
+	habits.Use(authMW)
+	habitHandler.RegisterRoutes(habits)
 }

@@ -25,6 +25,17 @@ func (r *HabitRepository) ListByUser(ctx context.Context, userID uint64) ([]mode
 	return habits, err
 }
 
+func (r *HabitRepository) ListByUserWithActive(ctx context.Context, userID uint64, isActive *bool) ([]models.Habit, error) {
+	query := r.db.WithContext(ctx).
+		Where("user_id = ?", userID)
+	if isActive != nil {
+		query = query.Where("is_active = ?", *isActive)
+	}
+	var habits []models.Habit
+	err := query.Order("start_date asc").Find(&habits).Error
+	return habits, err
+}
+
 func (r *HabitRepository) GetByID(ctx context.Context, id uint64) (*models.Habit, error) {
 	var habit models.Habit
 	if err := r.db.WithContext(ctx).First(&habit, id).Error; err != nil {
@@ -39,4 +50,11 @@ func (r *HabitRepository) Create(ctx context.Context, habit *models.Habit) error
 
 func (r *HabitRepository) Update(ctx context.Context, habit *models.Habit) error {
 	return r.db.WithContext(ctx).Save(habit).Error
+}
+
+func (r *HabitRepository) UpdateStatus(ctx context.Context, habitID uint64, isActive bool) error {
+	return r.db.WithContext(ctx).
+		Model(&models.Habit{}).
+		Where("id = ?", habitID).
+		Update("is_active", isActive).Error
 }

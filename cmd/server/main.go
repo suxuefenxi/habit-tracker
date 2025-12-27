@@ -10,6 +10,7 @@ import (
 	"habit-tracker/internal/config"
 	"habit-tracker/internal/db"
 	"habit-tracker/internal/handler"
+	"habit-tracker/internal/middleware"
 	"habit-tracker/internal/repository"
 	"habit-tracker/internal/router"
 	"habit-tracker/internal/service"
@@ -27,13 +28,17 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(db.DB)
+	habitRepo := repository.NewHabitRepository(db.DB)
 	jwtManager := utils.NewJWTManager(cfg.JWTSecret, 0)
 	authSvc := service.NewAuthService(userRepo, jwtManager)
 	authHandler := handler.NewAuthHandler(authSvc)
+	habitSvc := service.NewHabitService(habitRepo)
+	habitHandler := handler.NewHabitHandler(habitSvc)
+	authMW := middleware.AuthMiddleware(jwtManager)
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
-	router.Register(r, authHandler)
+	router.Register(r, authHandler, habitHandler, authMW)
 
 	// 静态文件前端（web/ 目录）
 	// - /index.html 等文件可直接访问
