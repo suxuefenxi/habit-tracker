@@ -9,7 +9,11 @@ import (
 
 	"habit-tracker/internal/config"
 	"habit-tracker/internal/db"
+	"habit-tracker/internal/handler"
+	"habit-tracker/internal/repository"
 	"habit-tracker/internal/router"
+	"habit-tracker/internal/service"
+	"habit-tracker/internal/utils"
 )
 
 func main() {
@@ -22,11 +26,14 @@ func main() {
 		log.Fatalf("init db: %v", err)
 	}
 
+	userRepo := repository.NewUserRepository(db.DB)
+	jwtManager := utils.NewJWTManager(cfg.JWTSecret, 0)
+	authSvc := service.NewAuthService(userRepo, jwtManager)
+	authHandler := handler.NewAuthHandler(authSvc)
+
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
-
-	// 先注册 API 路由（更具体的路由会优先匹配）
-	router.Register(r)
+	router.Register(r, authHandler)
 
 	// 静态文件前端（web/ 目录）
 	// - /index.html 等文件可直接访问
