@@ -6,7 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Register(r *gin.Engine, authHandler *handler.AuthHandler, habitHandler *handler.HabitHandler, authMW gin.HandlerFunc) {
+type Deps struct {
+	AuthHandler    *handler.AuthHandler
+	HabitHandler   *handler.HabitHandler
+	CheckinHandler *handler.CheckinHandler
+	AuthMW         gin.HandlerFunc
+}
+
+func Register(r *gin.Engine, deps Deps) {
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"ok": true})
 	})
@@ -17,9 +24,13 @@ func Register(r *gin.Engine, authHandler *handler.AuthHandler, habitHandler *han
 	})
 
 	authGroup := api.Group("/auth")
-	authHandler.RegisterRoutes(authGroup)
+	deps.AuthHandler.RegisterRoutes(authGroup)
 
 	habits := api.Group("/habits")
-	habits.Use(authMW)
-	habitHandler.RegisterRoutes(habits)
+	habits.Use(deps.AuthMW)
+	deps.HabitHandler.RegisterRoutes(habits)
+
+	checkins := api.Group("")
+	checkins.Use(deps.AuthMW)
+	deps.CheckinHandler.RegisterRoutes(checkins)
 }

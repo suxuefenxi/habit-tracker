@@ -29,16 +29,31 @@ func main() {
 
 	userRepo := repository.NewUserRepository(db.DB)
 	habitRepo := repository.NewHabitRepository(db.DB)
+	checkinRepo := repository.NewCheckinRepository(db.DB)
+	pointsRepo := repository.NewPointsRepository(db.DB)
+	achRepo := repository.NewAchievementRepository(db.DB)
+	userAchRepo := repository.NewUserAchievementRepository(db.DB)
+
 	jwtManager := utils.NewJWTManager(cfg.JWTSecret, 0)
 	authSvc := service.NewAuthService(userRepo, jwtManager)
 	authHandler := handler.NewAuthHandler(authSvc)
+
+	pointsSvc := service.NewPointsService(userRepo, pointsRepo)
+	achSvc := service.NewAchievementService(achRepo, userAchRepo)
 	habitSvc := service.NewHabitService(habitRepo)
+	checkinSvc := service.NewCheckinService(habitRepo, checkinRepo, pointsSvc, achSvc)
 	habitHandler := handler.NewHabitHandler(habitSvc)
+	checkinHandler := handler.NewCheckinHandler(checkinSvc)
 	authMW := middleware.AuthMiddleware(jwtManager)
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
-	router.Register(r, authHandler, habitHandler, authMW)
+	router.Register(r, router.Deps{
+		AuthHandler:    authHandler,
+		HabitHandler:   habitHandler,
+		CheckinHandler: checkinHandler,
+		AuthMW:         authMW,
+	})
 
 	// 静态文件前端（web/ 目录）
 	// - /index.html 等文件可直接访问

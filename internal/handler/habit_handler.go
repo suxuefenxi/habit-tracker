@@ -10,6 +10,7 @@ import (
 
 	"habit-tracker/internal/middleware"
 	"habit-tracker/internal/service"
+	"habit-tracker/internal/utils"
 )
 
 type HabitHandler struct {
@@ -100,7 +101,7 @@ func (h *HabitHandler) UpdateHabit(c *gin.Context) {
 		writeHabitError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	habitID, err := parseIDParam(c.Param("id"))
+	habitID, err := utils.ParseIDParam(c.Param("id"))
 	if err != nil {
 		writeHabitError(c, http.StatusBadRequest, "invalid id")
 		return
@@ -161,7 +162,7 @@ func (h *HabitHandler) GetHabit(c *gin.Context) {
 		writeHabitError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	habitID, err := parseIDParam(c.Param("id"))
+	habitID, err := utils.ParseIDParam(c.Param("id"))
 	if err != nil {
 		writeHabitError(c, http.StatusBadRequest, "invalid id")
 		return
@@ -180,7 +181,7 @@ func (h *HabitHandler) ToggleHabitStatus(c *gin.Context) {
 		writeHabitError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	habitID, err := parseIDParam(c.Param("id"))
+	habitID, err := utils.ParseIDParam(c.Param("id"))
 	if err != nil {
 		writeHabitError(c, http.StatusBadRequest, "invalid id")
 		return
@@ -195,10 +196,6 @@ func (h *HabitHandler) ToggleHabitStatus(c *gin.Context) {
 		return
 	}
 	writeHabitOK(c, gin.H{"is_active": req.IsActive})
-}
-
-func parseIDParam(param string) (uint64, error) {
-	return strconv.ParseUint(param, 10, 64)
 }
 
 func statusFromHabitError(err error) int {
