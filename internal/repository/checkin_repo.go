@@ -60,6 +60,26 @@ func (r *CheckinRepository) SumCountByHabit(ctx context.Context, habitID uint64)
 	return total, err
 }
 
+func (r *CheckinRepository) SumCountByUser(ctx context.Context, userID uint64) (int64, error) {
+	var total int64
+	err := r.db.WithContext(ctx).
+		Model(&models.HabitCheckin{}).
+		Select("COALESCE(SUM(count),0)").
+		Where("user_id = ?", userID).
+		Scan(&total).Error
+	return total, err
+}
+
+func (r *CheckinRepository) SumCountByUserAndRange(ctx context.Context, userID uint64, start, end time.Time) (int64, error) {
+	var total int64
+	err := r.db.WithContext(ctx).
+		Model(&models.HabitCheckin{}).
+		Select("COALESCE(SUM(count),0)").
+		Where("user_id = ? AND checkin_date BETWEEN ? AND ?", userID, start, end).
+		Scan(&total).Error
+	return total, err
+}
+
 func (r *CheckinRepository) ListByHabitDesc(ctx context.Context, habitID uint64) ([]models.HabitCheckin, error) {
 	var records []models.HabitCheckin
 	err := r.db.WithContext(ctx).

@@ -32,8 +32,24 @@ func (r *UserRepository) GetByID(ctx context.Context, id uint64) (*models.User, 
 	return &user, nil
 }
 
+func (r *UserRepository) GetTotalCheckins(ctx context.Context, userID uint64) (int64, error) {
+	var total int64
+	err := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Select("total_checkins").
+		Where("id = ?", userID).
+		Scan(&total).Error
+	return total, err
+}
+
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 	return r.db.WithContext(ctx).Create(user).Error
+}
+
+func (r *UserRepository) ListAll(ctx context.Context) ([]models.User, error) {
+	var users []models.User
+	err := r.db.WithContext(ctx).Order("id asc").Find(&users).Error
+	return users, err
 }
 
 func (r *UserRepository) UpdatePoints(ctx context.Context, userID uint64, delta int64) error {
@@ -41,5 +57,13 @@ func (r *UserRepository) UpdatePoints(ctx context.Context, userID uint64, delta 
 		Model(&models.User{}).
 		Where("id = ?", userID).
 		UpdateColumn("points", gorm.Expr("points + ?", delta)).
+		Error
+}
+
+func (r *UserRepository) IncrementCheckins(ctx context.Context, userID uint64, delta int64) error {
+	return r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("id = ?", userID).
+		UpdateColumn("total_checkins", gorm.Expr("total_checkins + ?", delta)).
 		Error
 }

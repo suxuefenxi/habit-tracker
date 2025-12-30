@@ -41,18 +41,24 @@ func main() {
 	pointsSvc := service.NewPointsService(userRepo, pointsRepo)
 	achSvc := service.NewAchievementService(achRepo, userAchRepo)
 	habitSvc := service.NewHabitService(habitRepo)
-	checkinSvc := service.NewCheckinService(habitRepo, checkinRepo, pointsSvc, achSvc)
+	checkinSvc := service.NewCheckinService(habitRepo, userRepo, checkinRepo, pointsSvc, achSvc)
+	leaderboardSvc := service.NewLeaderboardService(userRepo, pointsRepo)
+	userStatsSvc := service.NewUserStatsService(userRepo, habitRepo, checkinRepo, pointsSvc)
 	habitHandler := handler.NewHabitHandler(habitSvc)
 	checkinHandler := handler.NewCheckinHandler(checkinSvc)
 	authMW := middleware.AuthMiddleware(jwtManager)
+	leaderboardHandler := handler.NewLeaderboardHandler(leaderboardSvc)
+	userHandler := handler.NewUserHandler(userStatsSvc)
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
 	router.Register(r, router.Deps{
-		AuthHandler:    authHandler,
-		HabitHandler:   habitHandler,
-		CheckinHandler: checkinHandler,
-		AuthMW:         authMW,
+		AuthHandler:        authHandler,
+		HabitHandler:       habitHandler,
+		CheckinHandler:     checkinHandler,
+		LeaderboardHandler: leaderboardHandler,
+		UserHandler:        userHandler,
+		AuthMW:             authMW,
 	})
 
 	// 静态文件前端（web/ 目录）

@@ -15,6 +15,7 @@ const baseCheckinPoints = 1
 
 type CheckinService struct {
 	habitRepo          *repository.HabitRepository
+	userRepo           *repository.UserRepository
 	checkinRepo        *repository.CheckinRepository
 	pointService       *PointsService
 	achievementService *AchievementService
@@ -34,13 +35,13 @@ type CheckinResult struct {
 	UnlockedAwards []models.UserAchievement
 }
 
-func NewCheckinService(habitRepo *repository.HabitRepository, checkins *repository.CheckinRepository, points *PointsService, achievements *AchievementService) *CheckinService {
-	return &CheckinService{habitRepo: habitRepo, checkinRepo: checkins, pointService: points, achievementService: achievements}
+func NewCheckinService(habitRepo *repository.HabitRepository, users *repository.UserRepository, checkins *repository.CheckinRepository, points *PointsService, achievements *AchievementService) *CheckinService {
+	return &CheckinService{habitRepo: habitRepo, userRepo: users, checkinRepo: checkins, pointService: points, achievementService: achievements}
 }
 
 func (s *CheckinService) Checkin(ctx context.Context, userID, habitID uint64, countInc int) (*CheckinResult, error) {
 	if countInc <= 0 {
-		return nil, errors.New("count_inc must be > 0")
+		return nil, errors.New("check-in count must be greater than 0")
 	}
 
 	habit, err := s.getOwnedHabit(ctx, userID, habitID)
@@ -59,9 +60,17 @@ func (s *CheckinService) Checkin(ctx context.Context, userID, habitID uint64, co
 	}
 
 	reached := todayRec.Count >= habit.TargetTimes
-	pointsAwarded, err := s.awardPointsIfReached(ctx, userID, habitID, reached)
-	if err != nil {
-		return nil, err
+	var pointsAwarded int
+	if reached {
+		if todayRec.Count == countInc { // first time reaching target today
+			pointsAwarded, err = s.awardPoints(ctx, userID, habitID)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if err := s.userRepo.IncrementCheckins(ctx, userID, 1); err != nil {
+			return nil, err
+		}
 	}
 
 	streak := s.calculateStreak(ctx, habitID, habit.TargetTimes, today)
@@ -119,10 +128,7 @@ func (s *CheckinService) upsertToday(ctx context.Context, userID, habitID uint64
 	return s.checkinRepo.Upsert(ctx, rec)
 }
 
-func (s *CheckinService) awardPointsIfReached(ctx context.Context, userID, habitID uint64, reached bool) (int, error) {
-	if !reached {
-		return 0, nil
-	}
+func (s *CheckinService) awardPoints(ctx context.Context, userID, habitID uint64) (int, error) {
 	delta := int64(baseCheckinPoints)
 	if err := s.pointService.AddPoints(ctx, userID, delta, "checkin", &habitID); err != nil {
 		return 0, err

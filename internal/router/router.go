@@ -7,10 +7,12 @@ import (
 )
 
 type Deps struct {
-	AuthHandler    *handler.AuthHandler
-	HabitHandler   *handler.HabitHandler
-	CheckinHandler *handler.CheckinHandler
-	AuthMW         gin.HandlerFunc
+	AuthHandler        *handler.AuthHandler
+	HabitHandler       *handler.HabitHandler
+	CheckinHandler     *handler.CheckinHandler
+	LeaderboardHandler *handler.LeaderboardHandler
+	UserHandler        *handler.UserHandler
+	AuthMW             gin.HandlerFunc
 }
 
 func Register(r *gin.Engine, deps Deps) {
@@ -25,6 +27,14 @@ func Register(r *gin.Engine, deps Deps) {
 
 	authGroup := api.Group("/auth")
 	deps.AuthHandler.RegisterRoutes(authGroup)
+
+	userGroup := api.Group("/user")
+	userGroup.Use(deps.AuthMW)
+	deps.UserHandler.RegisterRoutes(userGroup)
+
+	leaderboard := api.Group("/leaderboard")
+	leaderboard.Use(deps.AuthMW)
+	deps.LeaderboardHandler.RegisterRoutes(leaderboard)
 
 	habits := api.Group("/habits")
 	habits.Use(deps.AuthMW)
