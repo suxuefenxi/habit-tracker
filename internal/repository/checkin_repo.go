@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"time"
+	"errors"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -20,15 +21,28 @@ func NewCheckinRepository(db *gorm.DB) *CheckinRepository {
 
 // Upsert by (habit_id, checkin_date) to avoid duplicate daily records.
 func (r *CheckinRepository) Upsert(ctx context.Context, checkin *models.HabitCheckin) error {
-	return r.db.WithContext(ctx).
-		Clauses(clause.OnConflict{
-			Columns: []clause.Column{{Name: "habit_id"}, {Name: "checkin_date"}},
-			DoUpdates: clause.Assignments(map[string]interface{}{
-				"count":   gorm.Expr("habit_checkins.count + EXCLUDED.count"),
-				"user_id": gorm.Expr("EXCLUDED.user_id"),
-			}),
-		}).
-		Create(checkin).Error
+    return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+        var existing models.HabitCheckin
+
+        // 加锁查询，避免并发问题
+        err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+            Where("habit_id = ? AND checkin_date = ?", checkin.HabitID, checkin.CheckinDate).
+            First(&existing).Error
+
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            // 不存在就插入
+            return tx.Create(checkin).Error
+        }
+        if err != nil {
+            return err
+        }
+
+        // 已存在就累加 count 并更新 user_id
+        return tx.Model(&existing).Updates(map[string]interface{}{
+            "count":   gorm.Expr("count + ?", checkin.Count),
+            "user_id": checkin.UserID,
+        }).Error
+    })
 }
 
 func (r *CheckinRepository) GetByHabitAndDate(ctx context.Context, habitID uint64, date time.Time) (*models.HabitCheckin, error) {

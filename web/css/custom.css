@@ -1,0 +1,160 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+}
+
+.card {
+    border-radius: 12px;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+.btn-outline-primary {
+    border-radius: 8px;
+    border-width: 2px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.6s ease;
+}
+
+.progress-bar.bg-success {
+    background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%);
+}
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.table thead th {
+    border: none;
+    font-weight: 600;
+    padding: 14px;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    border: none;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 10px 14px;
+    transition: all 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+.nav-tabs .nav-link {
+    border-radius: 8px 8px 0 0;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.bg-light {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+}
+
+.text-primary {
+    color: #667eea !important;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #00b8e6 0%, #2d6bc4 100%);
+}
+
+.btn-secondary {
+    border-radius: 8px;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>习惯养成系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <style>
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-4">Habit Tracker</h1>
+            <p class="lead mb-5">养成好习惯，成就更好的自己。记录每一天，见证每一点进步。</p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="static/login.html" class="btn btn-light btn-lg px-4 gap-3">登录</a>
+                <a href="static/register.html" class="btn btn-outline-light btn-lg px-4">注册</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/api.js"></script>
+    <script>
+        // If already logged in, redirect to dashboard
+        if (Api.getToken()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

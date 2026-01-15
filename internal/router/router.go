@@ -12,10 +12,15 @@ type Deps struct {
 	CheckinHandler     *handler.CheckinHandler
 	LeaderboardHandler *handler.LeaderboardHandler
 	UserHandler        *handler.UserHandler
+	AchievementHandler *handler.AchievementHandler
 	AuthMW             gin.HandlerFunc
 }
 
 func Register(r *gin.Engine, deps Deps) {
+	// // Static files
+	r.Static("/static", "./web")
+	r.StaticFile("/", "./web/index.html")
+
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"ok": true})
 	})
@@ -35,6 +40,10 @@ func Register(r *gin.Engine, deps Deps) {
 	leaderboard := api.Group("/leaderboard")
 	leaderboard.Use(deps.AuthMW)
 	deps.LeaderboardHandler.RegisterRoutes(leaderboard)
+
+	achievements := api.Group("/achievements")
+	achievements.Use(deps.AuthMW)
+	deps.AchievementHandler.RegisterRoutes(achievements)
 
 	habits := api.Group("/habits")
 	habits.Use(deps.AuthMW)

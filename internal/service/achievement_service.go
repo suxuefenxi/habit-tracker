@@ -23,6 +23,14 @@ func NewAchievementService(ach *repository.AchievementRepository, userAch *repos
 	return &AchievementService{achievements: ach, userAch: userAch}
 }
 
+func (s *AchievementService) ListAll(ctx context.Context) ([]models.Achievement, error) {
+	return s.achievements.ListAll(ctx)
+}
+
+func (s *AchievementService) ListByUser(ctx context.Context, userID uint64) ([]models.UserAchievement, error) {
+	return s.userAch.ListByUser(ctx, userID)
+}
+
 // EvaluateAndUnlock checks achievements and inserts newly unlocked ones.
 func (s *AchievementService) EvaluateAndUnlock(ctx context.Context, userID uint64, m AchievementMetrics) ([]models.UserAchievement, error) {
 	all, err := s.achievements.ListAll(ctx)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"log"
 
 	"gorm.io/gorm"
 
@@ -59,18 +60,18 @@ func (s *CheckinService) Checkin(ctx context.Context, userID, habitID uint64, co
 		return nil, err
 	}
 
-	reached := todayRec.Count >= habit.TargetTimes
+	reached := todayRec.Count == habit.TargetTimes // 不考虑超量完成
 	var pointsAwarded int
 	if reached {
-		if todayRec.Count == countInc { // first time reaching target today
-			pointsAwarded, err = s.awardPoints(ctx, userID, habitID)
-			if err != nil {
-				return nil, err
-			}
+		pointsAwarded, err = s.awardPoints(ctx, userID, habitID)
+		if err != nil {
+			return nil, err
 		}
+		
 		if err := s.userRepo.IncrementCheckins(ctx, userID, 1); err != nil {
 			return nil, err
 		}
+		log.Printf("用户 %d 完成习惯 %d 当日目标，奖励积分 %d", userID, habitID, pointsAwarded)
 	}
 
 	streak := s.calculateStreak(ctx, habitID, habit.TargetTimes, today)

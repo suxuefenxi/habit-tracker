@@ -3,7 +3,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -49,6 +48,7 @@ func main() {
 	authMW := middleware.AuthMiddleware(jwtManager)
 	leaderboardHandler := handler.NewLeaderboardHandler(leaderboardSvc)
 	userHandler := handler.NewUserHandler(userStatsSvc)
+	achHandler := handler.NewAchievementHandler(achSvc)
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
@@ -58,13 +58,9 @@ func main() {
 		CheckinHandler:     checkinHandler,
 		LeaderboardHandler: leaderboardHandler,
 		UserHandler:        userHandler,
+		AchievementHandler: achHandler,
 		AuthMW:             authMW,
 	})
-
-	// 静态文件前端（web/ 目录）
-	// - /index.html 等文件可直接访问
-	// - 如果你做 SPA，可改为 NoRoute 返回 index.html
-	r.StaticFS("/static", http.Dir("./web"))
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)

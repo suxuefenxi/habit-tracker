@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"time"
+	"log"
 
 	"habit-tracker/internal/models"
 	"habit-tracker/internal/repository"
@@ -22,16 +23,17 @@ func (s *PointsService) AddPoints(ctx context.Context, userID uint64, delta int6
 	if err := s.users.UpdatePoints(ctx, userID, delta); err != nil {
 		return err
 	}
-	log := &models.UserPointsLog{
+	pointLog := &models.UserPointsLog{
 		UserID:         userID,
 		ChangeAmount:   int(delta),
 		Reason:         reason,
 		RelatedHabitID: relatedHabitID,
 		CreatedAt:      time.Now(),
 	}
-	if err := s.points.AddLog(ctx, log); err != nil {
+	if err := s.points.AddLog(ctx, pointLog); err != nil {
 		return err
 	}
+	log.Printf("用户 %d 积分变动: %d", userID, pointLog.ChangeAmount)
 	return nil
 }
 
