@@ -1,6 +1,6 @@
 [build]
-builder = "nixpacks"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "./habit-tracker"
 restartPolicyType = "on_failure"
